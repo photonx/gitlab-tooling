@@ -1,17 +1,17 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from "axios";
 
-const SOURCE_BRANCH = process.env.SOURCE_BRANCH || 'release';
-const TARGET_BRANCH = process.env.TARGET_BRANCH || 'master';
+const SOURCE_BRANCH = process.env.SOURCE_BRANCH || "release";
+const TARGET_BRANCH = process.env.TARGET_BRANCH || "master";
 
-const GITLAB_API_URL = 'https://gitlab.bannersnack.net/api/v4';
-const PRIVATE_TOKEN = 'xxx';
-const PROJECT_ID = '276';
+const GITLAB_API_URL = "https://gitlab.bannersnack.net/api/v4";
+const PRIVATE_TOKEN = "";
+const PROJECT_ID = "276";
 
 // Axios instance with default headers
 const api: AxiosInstance = axios.create({
   baseURL: GITLAB_API_URL,
   headers: {
-    'Private-Token': PRIVATE_TOKEN,
+    "Private-Token": PRIVATE_TOKEN,
   },
 });
 
@@ -65,23 +65,23 @@ async function getMergeRequestIID(
     return existingMR.iid.toString();
   } else {
     const title = `Merge ${sourceBranch} into ${targetBranch}`;
-    // const newMR = await createMergeRequest(
-    //   projectId,
-    //   sourceBranch,
-    //   targetBranch,
-    //   title
-    // );
+    const newMR = await createMergeRequest(
+      projectId,
+      sourceBranch,
+      targetBranch,
+      title
+    );
 
-    // if (newMR) {
-    //   console.log(`Created new Merge Request: !${newMR.iid}`);
-    //   console.log(`URL: ${newMR.web_url}`);
-    //   return newMR.iid.toString();
-    // } else {
-    //   console.error('Failed to create a new merge request.');
-    //   return null;
-    // }
+    if (newMR) {
+      console.log(`Created new Merge Request: !${newMR.iid}`);
+      console.log(`URL: ${newMR.web_url}`);
+      return newMR.iid.toString();
+    } else {
+      console.error("Failed to create a new merge request.");
+      return null;
+    }
 
-    return null;
+    // return null;
   }
 }
 
@@ -97,7 +97,7 @@ async function findMergeRequest(
         params: {
           source_branch: sourceBranch,
           target_branch: targetBranch,
-          state: 'opened',
+          state: "opened",
         },
       }
     );
@@ -109,7 +109,7 @@ async function findMergeRequest(
       return null;
     }
   } catch (error: any) {
-    console.error('Error fetching merge requests:', error.message);
+    console.error("Error fetching merge requests:", error.message);
     return null;
   }
 }
@@ -133,7 +133,7 @@ async function createMergeRequest(
     return response.data;
   } catch (error: any) {
     console.error(
-      'Error creating merge request:',
+      "Error creating merge request:",
       error.response?.data?.message || error.message
     );
     return null;
@@ -152,7 +152,7 @@ async function getMergeRequestCommits(
     );
     return response.data;
   } catch (error: any) {
-    console.error('Error fetching merge request commits:', error.message);
+    console.error("Error fetching merge request commits:", error.message);
     return [];
   }
 }
@@ -191,17 +191,17 @@ function processDiffs(
   authorLineMap: AuthorLineMap
 ): void {
   diffs.forEach((diff) => {
-    const diffLines = diff.diff.split('\n');
+    const diffLines = diff.diff.split("\n");
     let inHunk = false;
 
     diffLines.forEach((line) => {
-      if (line.startsWith('@@')) {
+      if (line.startsWith("@@")) {
         inHunk = true; // Start of a diff hunk
         return;
       }
       if (!inHunk) return;
 
-      if (line.startsWith('+') && !line.startsWith('+++')) {
+      if (line.startsWith("+") && !line.startsWith("+++")) {
         // Line added
         const content = line.substring(1); // Remove the '+' sign
         if (!authorLineMap[authorName]) {
@@ -211,7 +211,7 @@ function processDiffs(
           filePath: diff.new_path,
           lineContent: content,
         });
-      } else if (line.startsWith('-') && !line.startsWith('---')) {
+      } else if (line.startsWith("-") && !line.startsWith("---")) {
         // Line removed - you can track deletions similarly if needed
       }
     });
@@ -261,7 +261,7 @@ function getContributorWithMostImpact(
 
   // Find the contributor with the highest impact score
   let maxImpact = -Infinity;
-  let topContributor = '';
+  let topContributor = "";
 
   for (const [author, score] of Object.entries(impactScores)) {
     if (score > maxImpact) {
@@ -304,7 +304,7 @@ async function getAuthorLineMap(
   );
 
   if (!MERGE_REQUEST_IID) {
-    console.error('Cannot proceed without a merge request IID.');
+    console.error("Cannot proceed without a merge request IID.");
     return;
   }
 
@@ -321,12 +321,12 @@ async function getAuthorLineMap(
   const lineCountMap = countLinesPerContributor(authorLineMap);
 
   // Display the counts
-  console.log('\nLines Added Per Contributor:');
+  console.log("\nLines Added Per Contributor:");
   for (const [author, lineCount] of Object.entries(lineCountMap)) {
     console.log(`Author: ${author} | Lines Added: ${lineCount}`);
   }
 
-  console.log('\nCommits Per Contributor:');
+  console.log("\nCommits Per Contributor:");
   for (const [author, commitCount] of Object.entries(commitCountMap)) {
     console.log(`Author: ${author} | Commits: ${commitCount}`);
   }
